@@ -1,0 +1,122 @@
+{%- assign globo_search = true -%}
+{%- assign home_filter = false -%}
+{%- assign has_form = false -%}
+{%- if request.page_type != 'index' -%}{%- assign home_filter = false -%}{%- endif -%}
+{%- if globo_search or request.page_type == 'collection' or request.page_type == 'search' or home_filter or has_form -%}
+{%- assign assets_url = 'product-1.png' | asset_img_url: '50x' | split: 'product-1_50x.png' -%}
+{%- assign files_url  = 'product-1.png' | file_img_url: '50x' | split: 'product-1_50x.png' -%}
+{%- assign primary_locale = 'null' -%}
+{%- for locale in shop.published_locales -%}{%- if locale.primary -%}{%- assign primary_locale = locale.iso_code | json -%}{%- endif -%}{%- endfor -%}
+<style>.spf-filter-loading #gf-products > *:not(.spf-product--skeleton), .spf-filter-loading [data-globo-filter-items] > *:not(.spf-product--skeleton){visibility: hidden; opacity: 0}</style>
+<link rel="preconnect" href="https://filter-v7.globosoftware.net" />
+<script>
+  document.getElementsByTagName('html')[0].classList.add('spf-filter-loading');
+  window.addEventListener("globoFilterRenderCompleted",function(e){document.getElementsByTagName('html')[0].classList.remove('spf-filter-loading')})
+  window.sortByRelevance = false;
+  window.moneyFormat = "{{ shop.money_format | replace: '"', "'" }}";
+  window.GloboMoneyFormat = "{{ shop.money_format | replace: '"', "'" }}";
+  window.GloboMoneyWithCurrencyFormat = "{{ shop.money_with_currency_format | replace: '"', "'" }}";
+  window.filterPriceRate = 1;
+  window.filterPriceAdjustment = 1;
+
+  window.shopCurrency = {{shop.currency | json}};
+  window.currentCurrency = {{cart.currency.iso_code | json}};
+
+  window.isMultiCurrency = {% assign enabled_currencies_size = shop.enabled_currencies | size %}{% if enabled_currencies_size > 1 and true %}true{% else %}false{% endif %};
+  window.globoFilterAssetsUrl = '{{ assets_url[0] }}';
+  window.assetsUrl = '{{ assets_url[0] }}';
+  window.filesUrl = '{{ files_url[0] }}';
+  var page_id = {% if request.page_type contains 'collection' %}{% if collection.id %}{{collection.id | default: 1}}{% else %}1{% endif %}{% elsif request.page_type contains 'search' %}2{% else %}0{% endif %};
+  var globo_filters_json = {"default":0}
+  var GloboFilterConfig = {
+    api: {
+      filterUrl: "https://filter-v7.globosoftware.net/filter",
+      searchUrl: "https://filter-v7.globosoftware.net/search",
+      url: "https://filter-v7.globosoftware.net",
+    },
+    shop: {
+      name: "{{ shop.name | escape }}",
+      url: "{{ shop.url }}",
+      domain: "{{ shop.permanent_domain }}",
+      is_multicurrency: {% assign is_multicurrency = shop.enabled_currencies | size %}{% if is_multicurrency > 1 and false and false %}true{% else %}false{% endif %},
+      currency: {{shop.currency | json}},
+      cur_currency: {{cart.currency.iso_code | json}},
+      cur_locale: {{request.locale.iso_code | json}},
+      cur_country: {{ localization.country.iso_code | json}},
+      locale: {{primary_locale}},
+      root_url: "{%- if routes.root_url != "/" -%}{{ routes.root_url }}{%- endif -%}",
+      country_code: {{shop.address.country_code | json}},
+      product_image: {width: 360, height: 360},
+      no_image_url: "https://cdn.shopify.com/s/images/themes/product-1.png",
+      themeStoreId: 714,
+      swatches:  {{ shop.metafields.globo.swatches | json }},
+      newUrlStruct: true,
+      translation: {"default":{"search":{"suggestions":"Sugerencias","collections":"Colecciones","pages":"Paginas","product":"Producto","products":"Productos","view_all":"Buscar","view_all_products":"Ver todos los productos","not_found":"No hay resultados","product_not_found":"No se encontraron productos","no_result_keywords_suggestions_title":"Busquedas populares","no_result_products_suggestions_title":"Sin embargo, te podria gustar","zero_character_keywords_suggestions_title":"Sugerencias","zero_character_popular_searches_title":"Busquedas populares","zero_character_products_suggestions_title":"Productos populares"},"form":{"heading":"Buscar productos","select":"-- Selecciona --","search":"Buscar","submit":"Buscar","clear":"Vacia"},"filter":{"filter_by":"Filtrar por","clear_all":"Vacia todo","view":"Vista","clear":"Vaciar","in_stock":"En Stock","out_of_stock":"Sin Stock","ready_to_ship":"Listo para enviar","search":"Opciones de busqueda","choose_values":"Escoge valores"},"sort":{"sort_by":"Ordenar por","manually":"Destacados","availability_in_stock_first":"Disponibilidad","relevance":"Relevancia","best_selling":"M\u00e1s vendido","alphabetically_a_z":"Alfab\u00e9ticamente, A-Z","alphabetically_z_a":"Alfab\u00e9ticamente, Z-A","price_low_to_high":"Precio, bajo a alto","price_high_to_low":"Precio, alto a bajo","date_new_to_old":"Fecha, nuevo a viejo","date_old_to_new":"Fecha, viejo a nuevo","sale_off":"% de descuento"},"product":{"add_to_cart":"A\u00f1adir a la cesta","unavailable":"Indisponible","sold_out":"Vendido","sale":"Oferta","load_more":"Carga m\u00e1s","limit":"Mostrar","search":"Buscar Productos","no_results":"Lo sentimos, no hay productos en esta colecci\u00f3n."}}},
+      redirects: {{ shop.metafields.globo.redirects | json }},
+      images: ["no-image-for-this-collection.png"],
+      settings: {{ settings | json }},
+      separate_options: null,
+      home_filter: {{home_filter}},
+      page: {{request.page_type | json}},
+      cache: {% if shop.metafields.globo.cacheInitRequest == false %}false{% else %}true{% endif %},
+      layout: "theme"
+    },
+    taxes: null,
+    special_countries: ["AE","AT","AU","BE","CA","CH","CZ","DE","DK","ES","FI","FR","GB","HK","IE","IL","IT","JP","KR","MY","NL","NO","NZ","PL","PT","SE","SG","US"],
+    adjustments: null,
+
+    year_make_model: {
+      id: null
+    },
+    filter: {
+      id: globo_filters_json[page_id] || globo_filters_json['default'] || 0,
+      layout: 1,
+      showCount: true,
+      isLoadMore: 0,
+      filter_on_search_page: false
+    },
+    search:{
+      enable: {{globo_search}},
+      zero_character_suggestion: true,
+      layout: 1,
+    },
+    collection: {
+      id: {%- if request.page_type == 'collection' -%}{{ collection.id | default: 0 }}{%- else -%}0{%- endif -%},
+      handle: {%- if request.page_type == 'collection' -%}'{{ collection.handle }}'{%- else -%}''{%- endif -%},
+      sort: {% if request.page_type contains 'search' %}'relevance'{% else %}'best-selling'{% endif %},
+      tags: {% if current_tags %}[{% for tag in current_tags %}{{ tag | json }},{{ tag | handle | json }}{% unless forloop.last %},{% endunless %}{% endfor %}]{% else %}null{% endif %},
+      vendor: {{ collection.current_vendor | json }},
+      type: {{ collection.current_type | json }},
+      term: {{ search.terms | escape | json }},
+      limit: 24,
+      products_count: {{collection.products_count | default: 0}},
+      excludeTags: null
+    },
+    customer: {% if customer %}{id: {{customer.id}}, tags: {{customer.tags | json}}}{% else %}false{% endif %},
+    selector: {
+      sortBy: '.header__push-filter--sort',
+      pagination: '.pagination, #gf_pagination_wrap',
+      products: '.collection__list'
+    }
+  };
+
+</script>
+<script defer src="{{ 'v5.globo.filter.lib.js' | asset_url }}"></script>
+{% if request.page_type == 'collection' or request.page_type == 'search' or home_filter or has_form %}<link rel="preload stylesheet" href="{{ 'v5.globo.filter.css' | asset_url }}" as="style">
+{% endif %}
+{% if globo_search %}<link rel="preload stylesheet" href="{{ 'v5.globo.search.css' | asset_url }}" as="style">
+{% endif %}
+{% endif %}
+
+
+  <script>
+     window.addEventListener('globoFilterRenderSearchCompleted', function () {
+      if (document.querySelector('#search-drawer .drawer__header .drawer__close-button') !== null) {
+        document.querySelector('#search-drawer .drawer__header .drawer__close-button').click();
+      }
+      setTimeout(function(){
+        document.querySelector('.gl-d-searchbox-input').focus();
+      }, 600);
+    });
+  </script>
+
