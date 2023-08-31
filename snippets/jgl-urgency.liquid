@@ -1,0 +1,60 @@
+<style>
+    .dtc-urgency{
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        align-self: stretch;
+        border-radius: 4px;
+        background: #EEF8F6;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        color: #000;
+        text-align: center;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 136%
+    }
+
+    @media (max-width: 1000px) {
+        .dtc-urgency{
+            margin-top: 0px;
+        }
+    }
+</style>
+
+<div class="dtc-urgency" id="countdown">
+    <span id="countdown-text">We are reserving your cart for 10:00 minutes!</span>
+</div>
+
+<script>
+    function startCountdown(duration, display) {
+        var timer = duration, minutes, seconds;
+
+        var countdown = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.textContent = "We are reserving your cart for " + minutes + ":" + seconds + " minutes!";
+
+            if (--timer < 0) {
+                clearInterval(countdown);
+                display.remove();
+                display = document.getElementById("countdown");
+                display.textContent = "Order reservation ended.";
+            }
+        }, 1000);
+    }
+
+    var countdownText = document.getElementById("countdown-text");
+
+    startCountdown(600, countdownText);
+</script>
+
+
